@@ -113,7 +113,7 @@
 <body>
     <div class="container">
         <h1>📊 Variance Analysis Tool</h1>
-        <p class="subtitle">Upload your files to generate variance reports</p>
+        <p class="subtitle">Upload your files to generate the flux PPT deck</p>
 
         <form id="varianceForm">
             <div class="form-group">
@@ -178,7 +178,7 @@
             // Show loading state
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<span class="spinner"></span> Processing...';
-            showStatus('Uploading files and generating reports... This may take 30-60 seconds.', 'info');
+            showStatus('Uploading files and generating slide deck... This may take 30-60 seconds.', 'info');
 
             try {
                 const response = await fetch(FUNCTION_URL, {
@@ -192,12 +192,13 @@
 
                 const data = await response.json();
 
-                // Download the files
+                // Download the PPT deck and Excel reference tables
+                const yr = document.getElementById('basisYear').value;
+                const fallbackName = yr + ' BoD_Flux.pptx';
+                downloadFile(data.pptx_base64, data.pptx_filename || fallbackName);
                 downloadFile(data.excel_xlsx_base64, data.excel_filename || 'VarianceTables.xlsx');
-                downloadFile(data.bullets_docx_base64, data.bullets_filename || 'Bullets.docx');
-                downloadFile(data.notes_docx_base64, data.notes_filename || 'Notes.docx');
 
-                showStatus('✅ Success! Your reports are downloading now.', 'success');
+                showStatus('✅ Success! Your PPT deck and variance tables are downloading now.', 'success');
 
             } catch (error) {
                 console.error('Error:', error);

@@ -5,7 +5,7 @@
   "id": "f566f035-5ba9-4b70-9e28-c83908dcb249",
   "packageName": "com.yourcompany.varianceanalysis",
   "developer": {
-    "name": "Your Company",
+    "name": "Qualys, Inc.",
     "websiteUrl": "https://www.yourcompany.com",
     "privacyUrl": "https://www.yourcompany.com/privacy",
     "termsOfUseUrl": "https://www.yourcompany.com/terms"
@@ -15,8 +15,8 @@
     "full": "Flux Variance Analysis Buddy"
   },
   "description": {
-    "short": "Generate flux variance commentary from P&L and vendor detail files.",
-    "full": "Upload P&L and vendor detail files to automatically generate variance analysis commentary including tables, bullets, and detailed notes."
+    "short": "Generate flux variance slide deck from P&L and vendor detail files.",
+    "full": "Upload P&L and vendor detail files to automatically generate the flux variance slide deck."
   },
   "icons": {
     "outline": "outline.png",
