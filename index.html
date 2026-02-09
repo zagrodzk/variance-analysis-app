@@ -134,12 +134,6 @@
                 <div class="help-text">Minimum variance amount to include</div>
             </div>
 
-            <div class="form-group">
-                <label>Basis Year</label>
-                <input type="number" id="basisYear" value="2026" min="2020" max="2030">
-                <div class="help-text">Year for variance calculations</div>
-            </div>
-
             <button type="submit" id="submitBtn">
                 Generate Slide Deck
             </button>
@@ -173,7 +167,6 @@
             formData.append('rep02_file', rep02File);
             formData.append('exp02_file', exp02File);
             formData.append('variance_threshold', document.getElementById('threshold').value);
-            formData.append('basis_year', document.getElementById('basisYear').value);
 
             // Show loading state
             submitBtn.disabled = true;
@@ -193,8 +186,7 @@
                 const data = await response.json();
 
                 // Download the PPT deck and Excel reference tables
-                const yr = document.getElementById('basisYear').value;
-                const fallbackName = yr + ' BoD_Flux.pptx';
+                const fallbackName = 'BoD_Flux.pptx';
                 downloadFile(data.pptx_base64, data.pptx_filename || fallbackName);
                 downloadFile(data.excel_xlsx_base64, data.excel_filename || 'VarianceTables.xlsx');
 
