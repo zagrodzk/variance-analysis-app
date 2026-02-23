@@ -15,8 +15,8 @@
     "full": "Flux Variance Analysis Buddy"
   },
   "description": {
-    "short": "Generate flux variance slide deck from P&L and vendor detail files.",
-    "full": "Upload P&L and vendor detail files to automatically generate the flux variance slide deck."
+    "short": "Generate flux variance slide deck from P&L, vendor detail, and consolidated P&L files.",
+    "full": "Upload P&L, vendor detail, and consolidated P&L files to automatically generate the flux variance slide deck."
   },
   "icons": {
     "outline": "outline.png",

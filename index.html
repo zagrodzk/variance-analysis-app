@@ -129,6 +129,12 @@
             </div>
 
             <div class="form-group">
+                <label>REP03 File (Consolidated P&L)</label>
+                <input type="file" id="rep03File" accept=".xlsx">
+                <div class="help-text">Optional — consolidated P&L for slide tables and ASV/EPS commentary</div>
+            </div>
+
+            <div class="form-group">
                 <label>Variance Threshold ($)</label>
                 <input type="number" id="threshold" value="50000" min="0" step="1000">
                 <div class="help-text">Minimum variance amount to include</div>
@@ -156,6 +162,7 @@
             // Validation
             const rep02File = document.getElementById('rep02File').files[0];
             const exp02File = document.getElementById('exp02File').files[0];
+            const rep03File = document.getElementById('rep03File').files[0];
             
             if (!rep02File || !exp02File) {
                 showStatus('Please select both required files', 'error');
@@ -166,6 +173,9 @@
             const formData = new FormData();
             formData.append('rep02_file', rep02File);
             formData.append('exp02_file', exp02File);
+            if (rep03File) {
+                formData.append('rep03_file', rep03File);
+            }
             formData.append('variance_threshold', document.getElementById('threshold').value);
 
             // Show loading state
