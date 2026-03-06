@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Variance Analysis Tool</title>
+    <script src="https://res.cdn.office.net/teams-js/2.22.0/js/MicrosoftTeams.min.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -131,7 +132,19 @@
             <div class="form-group">
                 <label>REP03 File (Consolidated P&L)</label>
                 <input type="file" id="rep03File" accept=".xlsx">
-                <div class="help-text">Optional — consolidated P&L for slide tables and ASV/EPS commentary</div>
+                <div class="help-text">Optional — consolidated P&amp;L for slide tables and ASV/EPS commentary</div>
+            </div>
+
+            <div class="form-group">
+                <label>FX Impact File</label>
+                <input type="file" id="fxImpactFile" accept=".xlsx">
+                <div class="help-text">Optional — workbook with tabs: <em>REP 11.1 FX Impact Actuals</em>, <em>ACT 01.3 P&amp;L Actuals</em>, <em>FX Impact - Plan &amp; BoD</em>. Populates FX-adjusted YoY% rows on slides.</div>
+            </div>
+
+            <div class="form-group">
+                <label>LTM Source File</label>
+                <input type="file" id="ltmSourceFile" accept=".xlsx,.xlsm">
+                <div class="help-text">Optional — workbook with <em>Top Line Adj</em> tab. Provides ASV, Revenue, and Current Billings FX currency impacts.</div>
             </div>
 
             <div class="form-group">
@@ -149,6 +162,9 @@
     </div>
 
     <script>
+        // Initialize Microsoft Teams SDK so the tab renders inside Teams
+        microsoftTeams.app.initialize();
+
         // IMPORTANT: Replace this with your actual Azure Function URL
         const FUNCTION_URL = 'https://qlys-fpa-reporting.azurewebsites.net/api/VarianceRunAll';
 
@@ -163,6 +179,8 @@
             const rep02File = document.getElementById('rep02File').files[0];
             const exp02File = document.getElementById('exp02File').files[0];
             const rep03File = document.getElementById('rep03File').files[0];
+            const fxImpactFile = document.getElementById('fxImpactFile').files[0];
+            const ltmSourceFile = document.getElementById('ltmSourceFile').files[0];
             
             if (!rep02File || !exp02File) {
                 showStatus('Please select both required files', 'error');
@@ -175,6 +193,12 @@
             formData.append('exp02_file', exp02File);
             if (rep03File) {
                 formData.append('rep03_file', rep03File);
+            }
+            if (fxImpactFile) {
+                formData.append('fx_impact_file', fxImpactFile);
+            }
+            if (ltmSourceFile) {
+                formData.append('ltm_source_file', ltmSourceFile);
             }
             formData.append('variance_threshold', document.getElementById('threshold').value);
 
@@ -195,12 +219,16 @@
 
                 const data = await response.json();
 
-                // Download the PPT deck and Excel reference tables
+                // Download the PPT deck, trimmed deck, and Excel reference tables
                 const fallbackName = 'BoD_Flux.pptx';
                 downloadFile(data.pptx_base64, data.pptx_filename || fallbackName);
+                if (data.pptx_trimmed_base64) {
+                    downloadFile(data.pptx_trimmed_base64, data.pptx_trimmed_filename || 'BoD_Flux_Trimmed.pptx');
+                }
                 downloadFile(data.excel_xlsx_base64, data.excel_filename || 'VarianceTables.xlsx');
 
-                showStatus('✅ Success! Your PPT deck and variance tables are downloading now.', 'success');
+                const trimmedNote = data.pptx_trimmed_base64 ? ' Full deck, trimmed deck, and variance tables are downloading.' : ' PPT deck and variance tables are downloading.';
+                showStatus('\u2705 Success!' + trimmedNote, 'success');
 
             } catch (error) {
                 console.error('Error:', error);
