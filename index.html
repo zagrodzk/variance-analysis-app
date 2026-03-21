@@ -266,6 +266,7 @@
         microsoftTeams.app.initialize();
 
         const BASE_URL = 'https://qlys-fpa-reporting.azurewebsites.net/api';
+        const APP_TOKEN = new URLSearchParams(window.location.search).get('token') || '';
         const statusDiv = document.getElementById('status');
 
         // ── Version data cache ──
@@ -306,7 +307,7 @@
             const bodSel = document.getElementById('bodVersion');
             const planSel = document.getElementById('planVersion');
             try {
-                const resp = await fetch(`${BASE_URL}/ListVersions`);
+                const resp = await fetch(`${BASE_URL}/ListVersions`, { headers: { 'X-App-Token': APP_TOKEN } });
                 const data = await resp.json();
                 if (data.status !== 'ok') throw new Error(data.message || 'Failed to load versions');
                 anaplanVersions = data.versions.filter(v =>
@@ -421,6 +422,7 @@
             try {
                 const response = await fetch(`${BASE_URL}/VarianceRunIntegrated`, {
                     method: 'POST',
+                    headers: { 'X-App-Token': APP_TOKEN },
                     body: formData
                 });
 
