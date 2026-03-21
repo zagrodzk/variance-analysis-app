@@ -15,7 +15,7 @@
     "full": "Flux Variance Analysis Buddy"
   },
   "description": {
-    "short": "Generate flux variance slide deck from P&L, vendor detail, and consolidated P&L files.",
+    "short": "Generate flux variance deck from P&L, vendor detail, and consolidated files.",
     "full": "Upload P&L, vendor detail, and consolidated P&L files to automatically generate the flux variance slide deck."
   },
   "icons": {
@@ -27,8 +27,8 @@
     {
       "entityId": "varianceAnalysis",
       "name": "Variance Analysis",
-      "contentUrl": "https://zagrodzk.github.io/variance-analysis-app",
-      "scopes": ["personal", "groupchat", "team"]
+      "contentUrl": "https://zagrodzk.github.io/variance-analysis-app/",
+      "scopes": ["personal"]
     }
   ],
   "permissions": [

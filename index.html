@@ -25,7 +25,35 @@
         }
         .subtitle {
             color: #666;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
+        }
+        .mode-toggle {
+            display: flex;
+            background: #f0f0f0;
+            border-radius: 6px;
+            padding: 3px;
+            margin-bottom: 25px;
+        }
+        .mode-toggle button {
+            flex: 1;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            background: transparent;
+            color: #666;
+            margin: 0;
+            width: auto;
+        }
+        .mode-toggle button.active {
+            background: #0078d4;
+            color: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        }
+        .mode-toggle button:hover:not(.active) {
+            color: #333;
         }
         .form-group {
             margin-bottom: 20px;
@@ -52,7 +80,22 @@
             border: 2px solid #e0e0e0;
             border-radius: 4px;
         }
-        button {
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 4px;
+            background: #fafafa;
+            font-size: 14px;
+        }
+        .row {
+            display: flex;
+            gap: 15px;
+        }
+        .row > .form-group {
+            flex: 1;
+        }
+        button[type="submit"] {
             background-color: #0078d4;
             color: white;
             padding: 12px 30px;
@@ -64,10 +107,10 @@
             width: 100%;
             margin-top: 10px;
         }
-        button:hover {
+        button[type="submit"]:hover {
             background-color: #005a9e;
         }
-        button:disabled {
+        button[type="submit"]:disabled {
             background-color: #ccc;
             cursor: not-allowed;
         }
@@ -109,14 +152,74 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>📊 Variance Analysis Tool</h1>
-        <p class="subtitle">Upload your files to generate the flux PPT deck</p>
+        <h1>Variance Analysis Tool</h1>
+        <p class="subtitle">Generate the flux PPT deck</p>
 
-        <form id="varianceForm">
+        <div class="mode-toggle">
+            <button type="button" id="modeIntegrated" class="active" onclick="setMode('integrated')">Integrated</button>
+            <button type="button" id="modeManual" onclick="setMode('manual')">Manual Upload</button>
+        </div>
+
+        <!-- ============ INTEGRATED MODE ============ -->
+        <form id="integratedForm" class="">
+            <div class="row">
+                <div class="form-group">
+                    <label>Basis Quarter <span class="required">*</span></label>
+                    <select id="basisQuarter" required>
+                        <option value="">Select quarter...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Fiscal Year <span class="required">*</span></label>
+                    <select id="fiscalYear" required>
+                        <option value="">Select year...</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label>BoD Version <span class="required">*</span></label>
+                    <select id="bodVersion" required>
+                        <option value="">Loading versions...</option>
+                    </select>
+                </div>
+                <div class="form-group" id="planVersionGroup">
+                    <label>Plan Version</label>
+                    <select id="planVersion">
+                        <option value="">Loading versions...</option>
+                    </select>
+                    <div class="help-text">Required for Q2-Q4</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>FX Impact + Basic EPS & WASO File</label>
+                <input type="file" id="intFxEpsWasoFile" accept=".xlsx">
+                <div class="help-text">Optional — tabs: <em>FX Impact - Plan &amp; BoD</em>, <em>Basic EPS &amp; WASO</em></div>
+            </div>
+
+            <div class="form-group">
+                <label>LTM Source File</label>
+                <input type="file" id="intLtmSourceFile" accept=".xlsx,.xlsm">
+                <div class="help-text">Optional — workbook with <em>Top Line Adj</em> tab</div>
+            </div>
+
+            <div class="form-group">
+                <label>Variance Threshold ($)</label>
+                <input type="number" id="intThreshold" value="50000" min="0" step="1000">
+            </div>
+
+            <button type="submit" id="intSubmitBtn">Generate Slide Deck</button>
+        </form>
+
+        <!-- ============ MANUAL MODE ============ -->
+        <form id="manualForm" class="hidden">
             <div class="form-group">
                 <label>REP02_1 File (P&L) <span class="required">*</span></label>
                 <input type="file" id="rep02File" accept=".xlsx" required>
@@ -138,24 +241,21 @@
             <div class="form-group">
                 <label>FX Impact File</label>
                 <input type="file" id="fxImpactFile" accept=".xlsx">
-                <div class="help-text">Optional — workbook with tabs: <em>REP 11.1 FX Impact Actuals</em>, <em>ACT 01.3 P&amp;L Actuals</em>, <em>FX Impact - Plan &amp; BoD</em>. Populates FX-adjusted YoY% rows on slides.</div>
+                <div class="help-text">Optional — workbook with tabs: <em>REP 11.1 FX Impact Actuals</em>, <em>ACT 01.3 P&amp;L Actuals</em>, <em>FX Impact - Plan &amp; BoD</em></div>
             </div>
 
             <div class="form-group">
                 <label>LTM Source File</label>
                 <input type="file" id="ltmSourceFile" accept=".xlsx,.xlsm">
-                <div class="help-text">Optional — workbook with <em>Top Line Adj</em> tab. Provides ASV, Revenue, and Current Billings FX currency impacts.</div>
+                <div class="help-text">Optional — workbook with <em>Top Line Adj</em> tab</div>
             </div>
 
             <div class="form-group">
                 <label>Variance Threshold ($)</label>
                 <input type="number" id="threshold" value="50000" min="0" step="1000">
-                <div class="help-text">Minimum variance amount to include</div>
             </div>
 
-            <button type="submit" id="submitBtn">
-                Generate Slide Deck
-            </button>
+            <button type="submit" id="manSubmitBtn">Generate Slide Deck</button>
         </form>
 
         <div id="status" class="status"></div>
@@ -165,50 +265,215 @@
         // Initialize Microsoft Teams SDK so the tab renders inside Teams
         microsoftTeams.app.initialize();
 
-        // IMPORTANT: Replace this with your actual Azure Function URL
-        const FUNCTION_URL = 'https://qlys-fpa-reporting.azurewebsites.net/api/VarianceRunAll';
-
-        const form = document.getElementById('varianceForm');
-        const submitBtn = document.getElementById('submitBtn');
+        const BASE_URL = 'https://qlys-fpa-reporting.azurewebsites.net/api';
         const statusDiv = document.getElementById('status');
 
-        form.addEventListener('submit', async (e) => {
+        // ── Version data cache ──
+        let anaplanVersions = [];
+
+        // ── Mode toggle ──
+        function setMode(mode) {
+            document.getElementById('integratedForm').classList.toggle('hidden', mode !== 'integrated');
+            document.getElementById('manualForm').classList.toggle('hidden', mode !== 'manual');
+            document.getElementById('modeIntegrated').classList.toggle('active', mode === 'integrated');
+            document.getElementById('modeManual').classList.toggle('active', mode === 'manual');
+            statusDiv.style.display = 'none';
+        }
+
+        // ── Populate quarter/year dropdowns ──
+        function initQuarterDropdowns() {
+            const qSel = document.getElementById('basisQuarter');
+            ['Q1', 'Q2', 'Q3', 'Q4'].forEach(q => {
+                const opt = document.createElement('option');
+                opt.value = q;
+                opt.textContent = q;
+                qSel.appendChild(opt);
+            });
+
+            const ySel = document.getElementById('fiscalYear');
+            const currentYear = new Date().getFullYear();
+            for (let y = currentYear + 1; y >= currentYear - 3; y--) {
+                const fy = y % 100;
+                const opt = document.createElement('option');
+                opt.value = `FY${fy < 10 ? '0' + fy : fy}`;
+                opt.textContent = `FY${fy < 10 ? '0' + fy : fy}`;
+                ySel.appendChild(opt);
+            }
+        }
+
+        // ── Load versions from Anaplan ──
+        async function loadVersions() {
+            const bodSel = document.getElementById('bodVersion');
+            const planSel = document.getElementById('planVersion');
+            try {
+                const resp = await fetch(`${BASE_URL}/ListVersions`);
+                const data = await resp.json();
+                if (data.status !== 'ok') throw new Error(data.message || 'Failed to load versions');
+                anaplanVersions = data.versions.filter(v =>
+                    v.name !== 'All Versions' && v.name !== 'Actual' && v.name !== 'Forecast'
+                );
+                populateVersionDropdowns();
+            } catch (err) {
+                bodSel.innerHTML = '<option value="">Failed to load versions</option>';
+                planSel.innerHTML = '<option value="">Failed to load versions</option>';
+                console.error('Version load error:', err);
+            }
+        }
+
+        function populateVersionDropdowns() {
+            const bodSel = document.getElementById('bodVersion');
+            const planSel = document.getElementById('planVersion');
+            bodSel.innerHTML = '<option value="">Select BoD version...</option>';
+            planSel.innerHTML = '<option value="">None (Q1 only)</option>';
+
+            anaplanVersions.forEach(v => {
+                const bOpt = document.createElement('option');
+                bOpt.value = v.id;
+                bOpt.textContent = v.name;
+                bodSel.appendChild(bOpt);
+
+                const pOpt = document.createElement('option');
+                pOpt.value = v.id;
+                pOpt.textContent = v.name;
+                planSel.appendChild(pOpt);
+            });
+
+            // Auto-select defaults based on quarter/year
+            autoSelectVersions();
+        }
+
+        function autoSelectVersions() {
+            const q = document.getElementById('basisQuarter').value;
+            const fy = document.getElementById('fiscalYear').value;
+            if (!q || !fy) return;
+
+            const yearNum = parseInt(fy.replace('FY', ''), 10);
+            const year4 = yearNum < 50 ? 2000 + yearNum : 1900 + yearNum;
+
+            const bodSel = document.getElementById('bodVersion');
+            const planSel = document.getElementById('planVersion');
+
+            // Convention: Q1 BoD = "BOD Company Plan/BOD Q1 YYYY"
+            //             Q2-Q4 BoD = "Budget BOD QX YYYY"
+            //             Plan = "BOD Company Plan/BOD Q1 YYYY" (annual plan)
+            let bodDefault, planDefault;
+            if (q === 'Q1') {
+                bodDefault = `BOD Company Plan/BOD Q1 ${year4}`;
+                planDefault = '';
+            } else {
+                bodDefault = `Budget BOD ${q} ${year4}`;
+                // Plan is always the annual BOD for that FY
+                planDefault = `BOD Company Plan/BOD Q1 ${year4}`;
+            }
+
+            // Try to match
+            for (const opt of bodSel.options) {
+                if (opt.textContent === bodDefault) {
+                    bodSel.value = opt.value;
+                    break;
+                }
+            }
+            for (const opt of planSel.options) {
+                if (opt.textContent === planDefault) {
+                    planSel.value = opt.value;
+                    break;
+                }
+            }
+        }
+
+        // Re-run auto-select when quarter or year changes
+        document.getElementById('basisQuarter').addEventListener('change', autoSelectVersions);
+        document.getElementById('fiscalYear').addEventListener('change', autoSelectVersions);
+
+        // ── Integrated form submit ──
+        document.getElementById('integratedForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
-            // Validation
-            const rep02File = document.getElementById('rep02File').files[0];
-            const exp02File = document.getElementById('exp02File').files[0];
-            const rep03File = document.getElementById('rep03File').files[0];
-            const fxImpactFile = document.getElementById('fxImpactFile').files[0];
-            const ltmSourceFile = document.getElementById('ltmSourceFile').files[0];
-            
-            if (!rep02File || !exp02File) {
-                showStatus('Please select both required files', 'error');
+            const q = document.getElementById('basisQuarter').value;
+            const fy = document.getElementById('fiscalYear').value;
+            const bodId = document.getElementById('bodVersion').value;
+            const planId = document.getElementById('planVersion').value;
+
+            if (!q || !fy || !bodId) {
+                showStatus('Please select quarter, fiscal year, and BoD version.', 'error');
+                return;
+            }
+            if (q !== 'Q1' && !planId) {
+                showStatus('Plan version is required for Q2-Q4.', 'error');
                 return;
             }
 
-            // Prepare form data
+            const formData = new FormData();
+            formData.append('basis_quarter', `${q} ${fy}`);
+            formData.append('bod_version_id', bodId);
+            if (planId) formData.append('plan_version_id', planId);
+
+            const fxFile = document.getElementById('intFxEpsWasoFile').files[0];
+            if (fxFile) formData.append('fx_eps_waso_file', fxFile);
+            const ltmFile = document.getElementById('intLtmSourceFile').files[0];
+            if (ltmFile) formData.append('ltm_source_file', ltmFile);
+            formData.append('variance_threshold', document.getElementById('intThreshold').value);
+
+            const btn = document.getElementById('intSubmitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Processing...';
+            showStatus('Fetching data from Anaplan and generating slide deck... This may take 2-3 minutes.', 'info');
+
+            try {
+                const response = await fetch(`${BASE_URL}/VarianceRunIntegrated`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                if (!response.ok || data.status === 'error') {
+                    throw new Error(data.message || `Server error: ${response.status}`);
+                }
+
+                downloadFile(data.pptx_base64, data.pptx_filename || 'BoD_Flux.pptx');
+                if (data.pptx_trimmed_base64) {
+                    downloadFile(data.pptx_trimmed_base64, data.pptx_trimmed_filename || 'BoD_Flux_Trimmed.pptx');
+                }
+                downloadFile(data.excel_xlsx_base64, data.excel_filename || 'VarianceTables.xlsx');
+                showStatus('Success! Full deck, trimmed deck, and variance tables are downloading.', 'success');
+
+            } catch (error) {
+                console.error('Error:', error);
+                showStatus(`Error: ${error.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Generate Slide Deck';
+            }
+        });
+
+        // ── Manual form submit (unchanged logic) ──
+        document.getElementById('manualForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const rep02File = document.getElementById('rep02File').files[0];
+            const exp02File = document.getElementById('exp02File').files[0];
+            if (!rep02File || !exp02File) {
+                showStatus('Please select both required files.', 'error');
+                return;
+            }
+
             const formData = new FormData();
             formData.append('rep02_file', rep02File);
             formData.append('exp02_file', exp02File);
-            if (rep03File) {
-                formData.append('rep03_file', rep03File);
-            }
-            if (fxImpactFile) {
-                formData.append('fx_impact_file', fxImpactFile);
-            }
-            if (ltmSourceFile) {
-                formData.append('ltm_source_file', ltmSourceFile);
-            }
+            const rep03File = document.getElementById('rep03File').files[0];
+            if (rep03File) formData.append('rep03_file', rep03File);
+            const fxFile = document.getElementById('fxImpactFile').files[0];
+            if (fxFile) formData.append('fx_impact_file', fxFile);
+            const ltmFile = document.getElementById('ltmSourceFile').files[0];
+            if (ltmFile) formData.append('ltm_source_file', ltmFile);
             formData.append('variance_threshold', document.getElementById('threshold').value);
 
-            // Show loading state
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<span class="spinner"></span> Processing...';
+            const btn = document.getElementById('manSubmitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Processing...';
             showStatus('Uploading files and generating slide deck... This may take 30-60 seconds.', 'info');
 
             try {
-                const response = await fetch(FUNCTION_URL, {
+                const response = await fetch(`${BASE_URL}/VarianceRunAll`, {
                     method: 'POST',
                     body: formData
                 });
@@ -218,27 +483,23 @@
                 }
 
                 const data = await response.json();
-
-                // Download the PPT deck, trimmed deck, and Excel reference tables
-                const fallbackName = 'BoD_Flux.pptx';
-                downloadFile(data.pptx_base64, data.pptx_filename || fallbackName);
+                downloadFile(data.pptx_base64, data.pptx_filename || 'BoD_Flux.pptx');
                 if (data.pptx_trimmed_base64) {
                     downloadFile(data.pptx_trimmed_base64, data.pptx_trimmed_filename || 'BoD_Flux_Trimmed.pptx');
                 }
                 downloadFile(data.excel_xlsx_base64, data.excel_filename || 'VarianceTables.xlsx');
-
-                const trimmedNote = data.pptx_trimmed_base64 ? ' Full deck, trimmed deck, and variance tables are downloading.' : ' PPT deck and variance tables are downloading.';
-                showStatus('\u2705 Success!' + trimmedNote, 'success');
+                showStatus('Success! Full deck, trimmed deck, and variance tables are downloading.', 'success');
 
             } catch (error) {
                 console.error('Error:', error);
-                showStatus(`❌ Error: ${error.message}. Please check your files and try again.`, 'error');
+                showStatus(`Error: ${error.message}. Please check your files and try again.`, 'error');
             } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = 'Generate Slide Deck';
+                btn.disabled = false;
+                btn.innerHTML = 'Generate Slide Deck';
             }
         });
 
+        // ── Helpers ──
         function downloadFile(base64Data, filename) {
             const link = document.createElement('a');
             link.href = 'data:application/octet-stream;base64,' + base64Data;
@@ -253,6 +514,10 @@
             statusDiv.className = 'status ' + type;
             statusDiv.style.display = 'block';
         }
+
+        // ── Init ──
+        initQuarterDropdowns();
+        loadVersions();
     </script>
 </body>
 </html>
