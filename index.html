@@ -324,7 +324,7 @@
                 planSel.innerHTML = '<option value="">Failed to load versions</option>';
                 const banner = document.createElement('div');
                 banner.style.cssText = 'background:#fee;border:1px solid #c00;color:#900;padding:10px;margin:10px 0;border-radius:4px;font-size:14px;';
-                banner.textContent = 'Version load error: ' + detail;
+                banner.textContent = 'Version load error: ' + detail + ' | Token: ' + (APP_TOKEN ? APP_TOKEN.substring(0,6) + '...' : '(empty)');
                 bodSel.parentElement.prepend(banner);
                 console.error('Version load error:', err);
             }
