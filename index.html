@@ -308,6 +308,7 @@
             const planSel = document.getElementById('planVersion');
             try {
                 const resp = await fetch(`${BASE_URL}/ListVersions`, { headers: { 'X-App-Token': APP_TOKEN } });
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
                 const data = await resp.json();
                 if (data.status !== 'ok') throw new Error(data.message || 'Failed to load versions');
                 anaplanVersions = data.versions.filter(v =>
@@ -315,8 +316,16 @@
                 );
                 populateVersionDropdowns();
             } catch (err) {
+                let detail = err.message || String(err);
+                if (err.name === 'TypeError' && detail.includes('Failed to fetch')) {
+                    detail = 'Network/CORS error — browser blocked the request to ' + BASE_URL;
+                }
                 bodSel.innerHTML = '<option value="">Failed to load versions</option>';
                 planSel.innerHTML = '<option value="">Failed to load versions</option>';
+                const banner = document.createElement('div');
+                banner.style.cssText = 'background:#fee;border:1px solid #c00;color:#900;padding:10px;margin:10px 0;border-radius:4px;font-size:14px;';
+                banner.textContent = 'Version load error: ' + detail;
+                bodSel.parentElement.prepend(banner);
                 console.error('Version load error:', err);
             }
         }
